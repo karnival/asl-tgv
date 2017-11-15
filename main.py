@@ -61,7 +61,20 @@ def grad(arg):
 
 
 def div(arg):
-    pass
+    if vec:
+        D = backward_diff(arg, 0)[0] + backward_diff(arg, 1)[1] + backward_diff(arg, 2)[2]
+        return D
+    elif tensor:
+        Dx = forward_diff(arg, 0)
+        Dy = forward_diff(arg, 1)
+        Dz = forward_diff(arg, 2)
+
+        # Unsure about this but seems plausible.
+        ret_vec = [Dx[0,0] + Dy[0,1] + Dz[0,2],
+                   Dx[0,1] + Dy[1,1] + Dz[2,1],
+                   Dx[0,2] + Dy[1,2] + Dz[2,2]]
+
+        return ret_vec
 
 
 def forward_diff(arg, dimn):
