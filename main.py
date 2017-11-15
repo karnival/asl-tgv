@@ -3,8 +3,8 @@ import numpy as np
 
 
 def update_step(P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
-    P_new = Pfun(lambd, P + sigma*(stack(ubar_c) - u_c_delta))
-    Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l) - u_l_delta))
+    P_new = Pfun(lambd, P + sigma*(stack(ubar_c) - u_c_d))
+    Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l) - u_l_d))
 
     p_new = Pfun(gamma1 * alpha1, p + sigma*(grad(ubar_l) - vbar))
     r_new = Pfun(gamma2 * alpha1, r + sigma*(grad(ubar_c - ubar_l) - wbar))
@@ -22,6 +22,22 @@ def update_step(P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
 
     vbar_new = 2*v_new - v
     wbar_new = 2*w_new - w
+
+
+def stack(data):
+    pass
+
+
+def epsilon(arg):
+    pass
+
+
+def grad(arg):
+    pass
+
+
+def div(arg):
+    pass
 
 
 def Pfun(a, b):
