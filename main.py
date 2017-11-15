@@ -25,18 +25,50 @@ def update_step(P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
 
 
 def stack(data):
-    pass
+    # Replicate data in 4th dimension to be the same size as the measured ASL.
+    to_ret = np.tile(data, (1, 1, 1, datapoints))
+    return to_ret
 
 
 def epsilon(arg):
-    pass
+    D1 = backward_diff(arg, 0)
+    D2 = backward_diff(arg, 1)
+    D3 = backward_diff(arg, 2)
+
+    M11 = D1[0]
+    M22 = D2[1]
+    M33 = D3[2]
+
+    M12 = (D1[1] + D2[0]) / 2
+    M13 = (D1[2] + D3[0]) / 2
+    M23 = (D2[2] + D3[1]) / 2
+
+    M = [[M11, M12, M13],
+         [M12, M22, M23],
+         [M13, M23, M33]]
+
+    return M
 
 
 def grad(arg):
-    pass
+    g0 = forward_diff(arg, 0)
+    g1 = forward_diff(arg, 1)
+    g2 = forward_diff(arg, 2)
+
+    G = [g0, g1, g2]
+
+    return G
 
 
 def div(arg):
+    pass
+
+
+def forward_diff(arg, dimn):
+    pass
+
+
+def backward_diff(arg, dimn):
     pass
 
 
