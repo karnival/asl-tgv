@@ -43,9 +43,9 @@ def epsilon(arg):
     M13 = (D1[2] + D3[0]) / 2
     M23 = (D2[2] + D3[1]) / 2
 
-    M = [[M11, M12, M13],
-         [M12, M22, M23],
-         [M13, M23, M33]]
+    M = np.array([[M11, M12, M13],
+                 [M12, M22, M23],
+                 [M13, M23, M33]])
 
     return M
 
@@ -55,19 +55,20 @@ def grad(arg):
     g1 = forward_diff(arg, 1)
     g2 = forward_diff(arg, 2)
 
-    G = [g0, g1, g2]
+    G = np.array([g0, g1, g2])
 
     return G
 
 
 def div(arg):
+    vec, tensor = False, False
     if np.squeeze(arg).ndim == 4: # Vector field: each (x,y,z) has a (v1,v2,v3).
         vec = True
     elif np.squeeze(arg).ndim == 5: # Tensor field: each (x,y,z) has a 3x3 mat.
         tensor = True
 
     if vec:
-        D = backward_diff(arg, 0)[0] + backward_diff(arg, 1)[1] + backward_diff(arg, 2)[2]
+        D = backward_diff(arg[:,:,:,0], 0) + backward_diff(arg[:,:,:,1], 1) + backward_diff(arg[:,:,:,2], 2)
         return D
     elif tensor:
         Dx = forward_diff(arg, 0)
