@@ -82,9 +82,9 @@ def div(arg):
         Dz = forward_diff(arg, 2)
 
         # Unsure about this but seems plausible.
-        ret_vec = [Dx[0,0] + Dy[0,1] + Dz[0,2],
-                   Dx[0,1] + Dy[1,1] + Dz[2,1],
-                   Dx[0,2] + Dy[1,2] + Dz[2,2]]
+        ret_vec = [Dx[:,:,:,0,0] + Dy[:,:,:,0,1] + Dz[:,:,:,0,2],
+                   Dx[:,:,:,0,1] + Dy[:,:,:,1,1] + Dz[:,:,:,2,1],
+                   Dx[:,:,:,0,2] + Dy[:,:,:,1,2] + Dz[:,:,:,2,2]]
 
         return ret_vec
 
@@ -103,11 +103,14 @@ def forward_diff(arg, dimn):
         diffed = np.empty(np.shape(arg))
         for i in range(arg.shape[3]):
             diffed[:,:,:,i] = forward_diff(arg[:,:,:,i], dimn)
-
         return diffed
 
     elif np.squeeze(arg).ndim == 5:
-        pass
+        diffed = np.empty(np.shape(arg))
+        for i in range(arg.shape[3]):
+            for j in range(arg.shape[4]):
+                diffed[:,:,:,i,j] = forward_diff(arg[:,:,:,i,j], dimn)
+        return diffed
 
 
 def backward_diff(arg, dimn):

@@ -56,5 +56,7 @@ def test_epsilon():
 
 def test_div():
     tmp_vec = grad(im)
-
     assert np.shape(div(tmp_vec)) == (3, 3, 3)
+
+    tmp_mat = np.random.rand(3, 3, 3, 3, 3)
+    assert np.shape(div(tmp_mat)) == (3, 3, 3, 3)
