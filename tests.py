@@ -35,3 +35,8 @@ def test_grad():
     assert np.shape(grad(im)) == (3, 3, 3, 3)
     assert np.shape(grad(np.hstack([im, im]))) == (3, 3, 6, 3)
     assert np.shape(grad(np.vstack([im, im]))) == (3, 6, 3, 3)
+
+def test_epsilon():
+    tmp = grad(im)
+
+    assert np.shape(epsilon(tmp)) == (3, 3, 3, 3, 3)
