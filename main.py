@@ -31,6 +31,7 @@ def stack(data):
 
 
 def epsilon(arg):
+    # TODO: check backward_diff applies separately to each dimn of the vector.
     D1 = backward_diff(arg, 0)
     D2 = backward_diff(arg, 1)
     D3 = backward_diff(arg, 2)
@@ -55,7 +56,12 @@ def grad(arg):
     g1 = forward_diff(arg, 1)
     g2 = forward_diff(arg, 2)
 
-    G = np.array([g0, g1, g2])
+    new_G_shape = arg.shape + (3,)
+    G = np.empty(new_G_shape)
+
+    G[:,:,:,0] = g0
+    G[:,:,:,1] = g1
+    G[:,:,:,2] = g2
 
     return G
 
@@ -84,13 +90,20 @@ def div(arg):
 
 
 def forward_diff(arg, dimn):
-    diffed = np.diff(arg, axis=dimn)
-    if dimn == 0:
-        return np.concatenate([diffed, np.zeros([1, np.shape(diffed)[1], np.shape(diffed)[2]])], axis=0)
-    elif dimn == 1:
-        return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], 1, np.shape(diffed)[2]])], axis=1)
-    elif dimn == 2:
-        return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], np.shape(diffed)[1], 1])], axis=2)
+    if np.squeeze(arg).ndim == 3:
+        diffed = np.diff(arg, axis=dimn)
+        if dimn == 0:
+            return np.concatenate([diffed, np.zeros([1, np.shape(diffed)[1], np.shape(diffed)[2]])], axis=0)
+        elif dimn == 1:
+            return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], 1, np.shape(diffed)[2]])], axis=1)
+        elif dimn == 2:
+            return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], np.shape(diffed)[1], 1])], axis=2)
+    elif np.squeeze(arg).ndim == 4:
+        diffed = np.empty(np.shape(arg))
+        for i in range(arg.shape[3]):
+            diffed[:,:,:,i] = forward_diff(arg[:,:,:,i], dimn)
+    elif np.squeeze(arg).ndim == 5:
+        pass
 
 
 def backward_diff(arg, dimn):

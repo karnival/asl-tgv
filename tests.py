@@ -30,11 +30,17 @@ def test_finite_differences():
     assert bwd1[2,0,1] == 3
     assert bwd1[2,0,2] == 7
 
+def test_finite_differences_4d():
+    tmp = np.empty([3,3,3,3])
+    tmp[:,:,:,0] = im
+    tmp[:,:,:,1] = im
+    tmp[:,:,:,2] = im
+
 def test_grad():
     # Check shapes are right.
     assert np.shape(grad(im)) == (3, 3, 3, 3)
-    assert np.shape(grad(np.hstack([im, im]))) == (3, 3, 6, 3)
-    assert np.shape(grad(np.vstack([im, im]))) == (3, 6, 3, 3)
+    assert np.shape(grad(np.hstack([im, im]))) == (3, 6, 3, 3)
+    assert np.shape(grad(np.vstack([im, im]))) == (6, 3, 3, 3)
 
 def test_epsilon():
     tmp = grad(im)
