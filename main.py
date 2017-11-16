@@ -88,23 +88,22 @@ def forward_diff(arg, dimn):
 
 
 def backward_diff(arg, dimn):
+    new_arg = np.copy(arg)
     if dimn == 0:
-        arg[-1,:,:] = 0
-        diffed = np.diff(arg, axis=dimn)
-        to_concat = np.expand_dims(arg[0,:,:], axis=0)
-        diffed = np.concatenate((to_concat, diffed), axis=dimn)
+        new_arg[-1,:,:] = 0
+        diffed = np.diff(new_arg, axis=dimn)
+        to_concat = np.expand_dims(new_arg[0,:,:], axis=0)
     elif dimn == 1:
-        arg[:,-1,:] = 0
-        diffed = np.diff(arg, axis=dimn)
-        to_concat = np.expand_dims(arg[:,0,:], axis=1)
-        diffed = np.concatenate((to_concat, diffed), axis=dimn)
+        new_arg[:,-1,:] = 0
+        diffed = np.diff(new_arg, axis=dimn)
+        to_concat = np.expand_dims(new_arg[:,0,:], axis=1)
     elif dimn == 2:
-        arg[:,:,-1] = 0
-        diffed = np.diff(arg, axis=dimn)
-        to_concat = np.expand_dims(arg[:,:,0], axis=2)
+        new_arg[:,:,-1] = 0
+        diffed = np.diff(new_arg, axis=dimn)
+        to_concat = np.expand_dims(new_arg[:,:,0], axis=2)
 
-    diffed = np.concatenate((to_concat, diffed), axis=dimn)
-    return diffed
+    to_ret = np.concatenate((to_concat, diffed), axis=dimn)
+    return to_ret 
 
 
 def Pfun(a, b):
