@@ -78,11 +78,30 @@ def div(arg):
 
 
 def forward_diff(arg, dimn):
-    pass
+    diffed = np.diff(arg, axis=dimn)
+    if dimn == 0:
+        return np.concatenate([diffed, np.zeros([1, np.shape(diffed)[1], np.shape(diffed)[2]])], axis=0)
+    elif dimn == 1:
+        return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], 1, np.shape(diffed)[2]])], axis=0)
+    elif dimn == 2:
+        return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], np.shape(diffed)[1], 1])], axis=0)
 
 
 def backward_diff(arg, dimn):
-    pass
+    if dimn == 0:
+        arg[-1,:,:] = 0
+        diffed = np.diff(arg, axis=dimn)
+        diffed = np.concatenate((arg[0,:,:], diffed), axis=dimn)
+    elif dimn == 1:
+        arg[:,-1,:] = 0
+        diffed = np.diff(arg, axis=dimn)
+        diffed = np.concatenate((arg[:,0,:], diffed), axis=dimn)
+    elif dimn == 2:
+        arg[:,:,-1] = 0
+        diffed = np.diff(arg, axis=dimn)
+        diffed = np.concatenate((arg[:,:,0], diffed), axis=dimn)
+
+    return diffed
 
 
 def Pfun(a, b):
