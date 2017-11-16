@@ -136,9 +136,6 @@ def backward_diff(arg, dimn):
 
         return diffed
 
-    elif np.squeeze(arg).ndim == 5:
-        pass
-
 
 def Pfun(a, b):
     for i in range(np.shape(b, 1)):
