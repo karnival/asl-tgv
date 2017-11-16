@@ -63,7 +63,7 @@ def grad(arg):
 def div(arg):
     if np.squeeze(arg).ndim == 4: # Vector field: each (x,y,z) has a (v1,v2,v3).
         vec = True
-    elif np.squeeze(arg).ndim == 5: # Tensor field: each (x,y,z) has a 2x2 mat.
+    elif np.squeeze(arg).ndim == 5: # Tensor field: each (x,y,z) has a 3x3 mat.
         tensor = True
 
     if vec:
