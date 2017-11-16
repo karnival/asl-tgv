@@ -3,6 +3,17 @@ import numpy as np
 
 
 def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
+    lambd = 5
+    alpha1 = 1
+    alpha2 = 1.41
+    gamma1 = 1
+    gamma2 = 1.5
+
+    # Not actually calculated what these have to be yet.
+    sigma = 0.1
+    tau = 0.1
+
+
     reps = np.shape(u_c_d)[3]
 
     P_new = Pfun(lambd, P + sigma*(stack(ubar_c, reps) - u_c_d))
@@ -30,7 +41,8 @@ def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, 
 
 def stack(data, datapoints):
     # Replicate data in 4th dimension to be the same size as the measured ASL.
-    to_ret = np.tile(data, (1, 1, 1, datapoints))
+    to_ret = np.expand_dims(data, axis=3)
+    to_ret = np.repeat(to_ret, datapoints, axis=3)
     return to_ret
 
 
@@ -158,6 +170,31 @@ def main():
 
     data = nib.load(filename).get_data()
 
+    u_l_d = data[:,:,:,0:-1:2]
+    u_c_d = data[:,:,:,1:-1:2]
+
+    u_l = np.nanmedian(u_l_d, 3)
+    u_c = np.nanmedian(u_c_d, 3)
+
+    P = u_c_d
+    Q = u_c_d
+
+    p = np.zeros(np.shape(u_l) + (3,))
+    r = p
+
+    q = np.zeros(np.shape(u_l) + (3, 3,))
+    s = q
+
+    ubar_c = u_c
+    ubar_l = u_l
+
+    v = p
+    w = r
+
+    vbar = v
+    wbar = w
+
+    update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar)
 
 if __name__ == '__main__':
     main()

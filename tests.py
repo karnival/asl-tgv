@@ -60,3 +60,8 @@ def test_div():
 
     tmp_mat = np.random.rand(3, 3, 3, 3, 3)
     assert np.shape(div(tmp_mat)) == (3, 3, 3, 3)
+
+
+def test_stack():
+    out = stack(im, 10)
+    assert out.shape == (im.shape + (10,))
