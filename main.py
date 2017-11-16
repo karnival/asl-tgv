@@ -2,17 +2,19 @@ import nibabel as nib
 import numpy as np
 
 
-def update_step(P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
-    P_new = Pfun(lambd, P + sigma*(stack(ubar_c) - u_c_d))
-    Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l) - u_l_d))
+def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
+    reps = np.shape(u_c_d)[3]
+
+    P_new = Pfun(lambd, P + sigma*(stack(ubar_c, reps) - u_c_d))
+    Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l, reps) - u_l_d))
 
     p_new = Pfun(gamma1 * alpha1, p + sigma*(grad(ubar_l) - vbar))
     r_new = Pfun(gamma2 * alpha1, r + sigma*(grad(ubar_c - ubar_l) - wbar))
     q_new = Pfun(gamma1 * alpha0, q + sigma*epsilon(vbar))
     s_new = Pfun(gamma2 * alpha0, s + sigma*epsilon(wbar))
 
-    u_c_new = u_c + tau * (div(r_new) - stack(P_new))
-    u_l_new = u_l + tau * (div(p_new - r_new) - stack(Q_new))
+    u_c_new = u_c + tau * (div(r_new) - stack(P_new, reps))
+    u_l_new = u_l + tau * (div(p_new - r_new) - stack(Q_new, reps))
 
     v_new = v + tau * (p_new + div(q_new))
     w_new = w + tau * (r_new + div(s_new))
@@ -23,8 +25,10 @@ def update_step(P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
     vbar_new = 2*v_new - v
     wbar_new = 2*w_new - w
 
+    return P_new, Q_new, p_new, r_new, q_new, s_new, u_c_new, u_l_new, v_new,\
+           w_new, ubar_c_new, ubar_l_new, vbar_new, wbar_new
 
-def stack(data):
+def stack(data, datapoints):
     # Replicate data in 4th dimension to be the same size as the measured ASL.
     to_ret = np.tile(data, (1, 1, 1, datapoints))
     return to_ret
