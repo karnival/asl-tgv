@@ -36,6 +36,13 @@ def test_finite_differences_4d():
     tmp[:,:,:,1] = im
     tmp[:,:,:,2] = im
 
+    F = forward_diff(tmp, 0)
+    assert np.all(F[:,:,:,0] == F[:,:,:,1])
+
+    B = backward_diff(tmp, 0)
+    assert np.all(B[:,:,:,0] == B[:,:,:,1])
+
+
 def test_grad():
     # Check shapes are right.
     assert np.shape(grad(im)) == (3, 3, 3, 3)

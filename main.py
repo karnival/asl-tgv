@@ -98,31 +98,46 @@ def forward_diff(arg, dimn):
             return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], 1, np.shape(diffed)[2]])], axis=1)
         elif dimn == 2:
             return np.concatenate([diffed, np.zeros([np.shape(diffed)[0], np.shape(diffed)[1], 1])], axis=2)
+
     elif np.squeeze(arg).ndim == 4:
         diffed = np.empty(np.shape(arg))
         for i in range(arg.shape[3]):
             diffed[:,:,:,i] = forward_diff(arg[:,:,:,i], dimn)
+
+        return diffed
+
     elif np.squeeze(arg).ndim == 5:
         pass
 
 
 def backward_diff(arg, dimn):
     new_arg = np.copy(arg)
-    if dimn == 0:
-        new_arg[-1,:,:] = 0
-        diffed = np.diff(new_arg, axis=dimn)
-        to_concat = np.expand_dims(new_arg[0,:,:], axis=0)
-    elif dimn == 1:
-        new_arg[:,-1,:] = 0
-        diffed = np.diff(new_arg, axis=dimn)
-        to_concat = np.expand_dims(new_arg[:,0,:], axis=1)
-    elif dimn == 2:
-        new_arg[:,:,-1] = 0
-        diffed = np.diff(new_arg, axis=dimn)
-        to_concat = np.expand_dims(new_arg[:,:,0], axis=2)
+    if np.squeeze(arg).ndim == 3:
+        if dimn == 0:
+            new_arg[-1,:,:] = 0
+            diffed = np.diff(new_arg, axis=dimn)
+            to_concat = np.expand_dims(new_arg[0,:,:], axis=0)
+        elif dimn == 1:
+            new_arg[:,-1,:] = 0
+            diffed = np.diff(new_arg, axis=dimn)
+            to_concat = np.expand_dims(new_arg[:,0,:], axis=1)
+        elif dimn == 2:
+            new_arg[:,:,-1] = 0
+            diffed = np.diff(new_arg, axis=dimn)
+            to_concat = np.expand_dims(new_arg[:,:,0], axis=2)
 
-    to_ret = np.concatenate((to_concat, diffed), axis=dimn)
-    return to_ret 
+        to_ret = np.concatenate((to_concat, diffed), axis=dimn)
+        return to_ret 
+
+    elif np.squeeze(arg).ndim == 4:
+        diffed = np.empty(np.shape(arg))
+        for i in range(arg.shape[3]):
+            diffed[:,:,:,i] = backward_diff(arg[:,:,:,i], dimn)
+
+        return diffed
+
+    elif np.squeeze(arg).ndim == 5:
+        pass
 
 
 def Pfun(a, b):
