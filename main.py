@@ -107,9 +107,10 @@ def div(arg):
         Dz = forward_diff(arg, 2)
 
         # Unsure about this but seems plausible.
-        ret_vec = [Dx[:,:,:,0,0] + Dy[:,:,:,0,1] + Dz[:,:,:,0,2],
-                   Dx[:,:,:,0,1] + Dy[:,:,:,1,1] + Dz[:,:,:,2,1],
-                   Dx[:,:,:,0,2] + Dy[:,:,:,1,2] + Dz[:,:,:,2,2]]
+        ret_vec = np.empty(np.shape(arg)[0:-2] + (3,))
+        ret_vec[:,:,:,0] = Dx[:,:,:,0,0] + Dy[:,:,:,0,1] + Dz[:,:,:,0,2]
+        ret_vec[:,:,:,1] = Dx[:,:,:,0,1] + Dy[:,:,:,1,1] + Dz[:,:,:,2,1]
+        ret_vec[:,:,:,2] = Dx[:,:,:,0,2] + Dy[:,:,:,1,2] + Dz[:,:,:,2,2]
 
         return ret_vec
 
