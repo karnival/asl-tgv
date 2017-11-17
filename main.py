@@ -21,9 +21,7 @@ def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, 
 
     p_new = Pfun(gamma1 * alpha1, p + sigma*(grad(ubar_l) - vbar))
     r_new = Pfun(gamma2 * alpha1, r + sigma*(grad(ubar_c - ubar_l) - wbar))
-    print(np.shape(vbar))
-    print(np.shape(q))
-    print(np.shape(epsilon(vbar)))
+
     q_new = Pfun(gamma1 * alpha0, q + sigma*epsilon(vbar))
     s_new = Pfun(gamma2 * alpha0, s + sigma*epsilon(wbar))
 
