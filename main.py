@@ -4,8 +4,8 @@ import numpy as np
 
 def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
     lambd = 5
-    alpha1 = 1
-    alpha2 = 1.41
+    alpha0 = 1
+    alpha1 = 1.41
     gamma1 = 1
     gamma2 = 1.5
 
@@ -14,13 +14,16 @@ def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, 
     tau = 0.1
 
 
-    reps = np.shape(u_c_d)[3]
+    reps = np.size(u_c_d, 3)
 
     P_new = Pfun(lambd, P + sigma*(stack(ubar_c, reps) - u_c_d))
     Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l, reps) - u_l_d))
 
     p_new = Pfun(gamma1 * alpha1, p + sigma*(grad(ubar_l) - vbar))
     r_new = Pfun(gamma2 * alpha1, r + sigma*(grad(ubar_c - ubar_l) - wbar))
+    print(np.shape(vbar))
+    print(np.shape(q))
+    print(np.shape(epsilon(vbar)))
     q_new = Pfun(gamma1 * alpha0, q + sigma*epsilon(vbar))
     s_new = Pfun(gamma2 * alpha0, s + sigma*epsilon(wbar))
 
@@ -164,10 +167,11 @@ def backward_diff(arg, dimn):
 
 
 def Pfun(a, b):
-    for i in range(np.shape(b, 1)):
-        for j in range(np.shape(b, 1)):
-            for k in range(np.shape(b, 1)):
-                to_ret[i,j,k] = b[i,j,k] / max(1, np.norm(b[i,j,:], 2) / a)
+    to_ret = np.empty(b.shape)
+    for i in range(b.shape[0]):
+        for j in range(b.shape[1]):
+            for k in range(b.shape[2]):
+                to_ret[i,j,k] = b[i,j,k] / max(1, np.linalg.norm(b[i,j,:], 2) / a)
 
     return to_ret
 
@@ -177,8 +181,8 @@ def main():
 
     data = nib.load(filename).get_data()
 
-    u_l_d = data[:,:,:,0:-1:2]
-    u_c_d = data[:,:,:,1:-1:2]
+    u_l_d = data[:,:,:,0::2]
+    u_c_d = data[:,:,:,1::2]
 
     u_l = np.nanmedian(u_l_d, 3)
     u_c = np.nanmedian(u_c_d, 3)
