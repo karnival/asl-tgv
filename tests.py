@@ -53,6 +53,10 @@ def test_epsilon():
     tmp = grad(im)
 
     assert np.shape(epsilon(tmp)) == (3, 3, 3, 3, 3)
+    
+    tmp = np.zeros((10, 10, 10, 3))
+
+    assert np.shape(epsilon(tmp)) == (10, 10, 10, 3, 3)
 
 def test_div():
     tmp_vec = grad(im)

@@ -47,22 +47,29 @@ def stack(data, datapoints):
 
 
 def epsilon(arg):
-    # TODO: check backward_diff applies separately to each dimn of the vector.
     D1 = backward_diff(arg, 0)
     D2 = backward_diff(arg, 1)
     D3 = backward_diff(arg, 2)
 
-    M11 = D1[0]
-    M22 = D2[1]
-    M33 = D3[2]
+    M11 = D1[:,:,:,0]
+    M22 = D2[:,:,:,1]
+    M33 = D3[:,:,:,2]
 
-    M12 = (D1[1] + D2[0]) / 2
-    M13 = (D1[2] + D3[0]) / 2
-    M23 = (D2[2] + D3[1]) / 2
+    M12 = (D1[:,:,:,1] + D2[:,:,:,0]) / 2
+    M13 = (D1[:,:,:,2] + D3[:,:,:,0]) / 2
+    M23 = (D2[:,:,:,2] + D3[:,:,:,1]) / 2
 
-    M = np.array([[M11, M12, M13],
-                 [M12, M22, M23],
-                 [M13, M23, M33]])
+    M = np.empty(np.shape(arg) + (3,))
+
+    M[:,:,:,0,0] = M11
+    M[:,:,:,0,1] = M12
+    M[:,:,:,0,2] = M13
+    M[:,:,:,1,0] = M12
+    M[:,:,:,1,1] = M22
+    M[:,:,:,1,2] = M23
+    M[:,:,:,2,0] = M13
+    M[:,:,:,2,1] = M23
+    M[:,:,:,2,2] = M33
 
     return M
 
