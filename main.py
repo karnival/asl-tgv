@@ -180,7 +180,8 @@ def Pfun(a, b):
 def main():
     filename = 'tmp_asl.nii.gz'
 
-    data = nib.load(filename).get_data()
+    datafile = nib.load(filename)
+    data = datafile.get_data()
 
     u_l_d = data[:,:,:,0::2]
     u_c_d = data[:,:,:,1::2]
@@ -212,6 +213,14 @@ def main():
         P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar = \
             update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
             ubar_c, ubar_l, vbar, wbar)
+
+    # Add singleton dimension so outputs can be concatenated.
+    ubar_c = np.expand_dims(ubar_c, axis=3)
+    ubar_l = np.expand_dims(ubar_l, axis=3)
+    out_data = np.concatenate((ubar_c, ubar_l), axis=3)
+
+    out_file = nib.Nifti1Image(out_data, datafile.affine, datafile.header)
+    out_file.to_filename('output.nii.gz')
 
 if __name__ == '__main__':
     main()
