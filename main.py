@@ -206,7 +206,12 @@ def main():
     vbar = v
     wbar = w
 
-    update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar)
+    num_iters = 1000
+    for i in range(num_iters):
+        print('Iteration ' + str(i) + ' of ' + str(num_iters))
+        P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar = \
+            update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
+            ubar_c, ubar_l, vbar, wbar)
 
 if __name__ == '__main__':
     main()
