@@ -169,7 +169,8 @@ def Pfun(a, b):
     for i in range(b.shape[0]):
         for j in range(b.shape[1]):
             for k in range(b.shape[2]):
-                to_ret[i,j,k] = b[i,j,k] / max(1, np.linalg.norm(b[i,j,:], 2) / a)
+                for l in range(b.shape[3]):
+                    to_ret[i,j,k,l] = b[i,j,k,l] / max(1, np.linalg.norm(b[i,j,k,:], 2) / a)
 
     return to_ret
 
