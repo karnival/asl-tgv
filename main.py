@@ -3,15 +3,15 @@ import numpy as np
 
 
 def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
-    lambd = 5
-    alpha0 = 1
-    alpha1 = 1.41
-    gamma1 = 1
-    gamma2 = 1.5
+    lambd = 4.0
+    alpha0 = 1.41
+    alpha1 = 1.0
+    gamma1 = 1.0
+    gamma2 = 1.0
 
     # Not actually calculated what these have to be yet.
-    sigma = 0.1
-    tau = 0.1
+    sigma = 0.5
+    tau = 0.01
 
 
     reps = np.size(u_c_d, 3)
@@ -25,9 +25,9 @@ def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, 
     q_new = Pfun(gamma1 * alpha0, q + sigma*epsilon(vbar))
     s_new = Pfun(gamma2 * alpha0, s + sigma*epsilon(wbar))
 
-    # Index P_new at 0th timepoint because this is conjugate of stack().
-    u_c_new = u_c + tau * (div(r_new) - P_new[:,:,:,0])
-    u_l_new = u_l + tau * (div(p_new - r_new) - Q_new[:,:,:,0])
+    # Mean over time is adjoint of stack(), we assume.
+    u_c_new = u_c + tau * (div(r_new) - np.mean(P_new, axis=3))
+    u_l_new = u_l + tau * (div(p_new - r_new) - np.mean(Q_new, axis=3))
 
     v_new = v + tau * (p_new + div(q_new))
     w_new = w + tau * (r_new + div(s_new))
@@ -207,7 +207,7 @@ def main():
     vbar = v
     wbar = w
 
-    num_iters = 1000
+    num_iters = 100
     for i in range(num_iters):
         print('Iteration ' + str(i) + ' of ' + str(num_iters))
         P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar = \
