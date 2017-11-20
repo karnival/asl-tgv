@@ -167,12 +167,12 @@ def backward_diff(arg, dimn):
 
 
 def Pfun(a, b):
-    to_ret = np.empty(b.shape)
-    for i in range(b.shape[0]):
-        for j in range(b.shape[1]):
-            for k in range(b.shape[2]):
-                for l in range(b.shape[3]):
-                    to_ret[i,j,k,l] = b[i,j,k,l] / max(1, np.linalg.norm(b[i,j,k,:], 2) / a)
+    norm = np.linalg.norm(b, ord=2, axis=3, keepdims=True)
+
+    # Essentially max(norm/a, 1) operation.
+    norm[norm/a < 1] = 1
+
+    to_ret = b / norm
 
     return to_ret
 
