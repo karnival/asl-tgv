@@ -2,19 +2,9 @@ import nibabel as nib
 import numpy as np
 
 
-def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar):
-    lambd = 4.0
-    alpha0 = 1.41
-    alpha1 = 1.0
-    gamma1 = 1.0
-    gamma2 = 1.0
-
-    # Not actually calculated what these have to be yet.
-    sigma = 0.5
-    tau = 0.01
-
-
-    reps = np.size(u_c_d, 3)
+def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
+                ubar_c, ubar_l, vbar, wbar, lambd, alpha0, alpha1,\
+                gamma1, gamma2, reps, sigma, tau):
 
     P_new = Pfun(lambd, P + sigma*(stack(ubar_c, reps) - u_c_d))
     Q_new = Pfun(lambd, Q + sigma*(stack(ubar_l, reps) - u_l_d))
@@ -229,12 +219,29 @@ def main():
     vbar = v
     wbar = w
 
+    lambd = 4.0
+    alpha0 = 1.41
+    alpha1 = 1.0
+    gamma1 = 1.0
+    gamma2 = 1.0
+
+    reps = np.size(u_c_d, 3)
+
+    # sigma*tau*|K|^2 < 1
+    # sigma set by lambda according to paper.
+    sigma = 6.0 / lambd
+    K2 = norm2_K_operator(reps) * 1.1 # Grow |K|^2 by 10% to be safe.
+    tau = 1.0 / (sigma * K2)
+
+    print('sigma: ' + str(sigma) + ', tau: ' + str(tau))
+
     num_iters = 100
     for i in range(num_iters):
         print('Iteration ' + str(i) + ' of ' + str(num_iters))
         P, Q, p, r, q, s, u_c, u_l, v, w, ubar_c, ubar_l, vbar, wbar = \
             update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
-            ubar_c, ubar_l, vbar, wbar)
+            ubar_c, ubar_l, vbar, wbar, lambd, alpha0, alpha1, gamma1,\
+            gamma2, reps, sigma, tau)
 
     # Add singleton dimension so outputs can be concatenated.
     ubar_c = np.expand_dims(ubar_c, axis=3)
