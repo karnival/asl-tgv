@@ -157,7 +157,9 @@ def backward_diff(arg, dimn):
 
 
 def Pfun(a, b):
-    norm = np.linalg.norm(b, ord=2, axis=3, keepdims=True)
+    # Equal to norm over fourth dimn, faster than np.linalg.norm().
+    norm = np.sqrt(np.einsum('ijkl...,ijkl...->ijk...', b, b))
+    norm = np.expand_dims(norm, axis=3)
 
     # Essentially max(norm/a, 1) operation.
     norm[norm/a < 1] = 1
