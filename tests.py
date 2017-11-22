@@ -69,3 +69,7 @@ def test_div():
 def test_stack():
     out = stack(im, 10)
     assert out.shape == (im.shape + (10,))
+
+
+def test_norm2_K_operator():
+    assert norm2_K_operator(30) == pytest.approx(62.06, 1E-3)

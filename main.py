@@ -177,6 +177,28 @@ def Pfun(a, b):
     return to_ret
 
 
+def norm2_K_operator(S_norm2, op_norm2=12):
+    # Find an upper bound on the squared norm of K.
+    # Inputs are squared norms, per original paper.
+    # S_norm2 bounds stacking operator's norm, I think <= timepoints.
+    # op_norm2 bounds 3D gradient operator norms, I think <= 12.
+
+    S = np.sqrt(S_norm2)
+    p = np.sqrt(op_norm2)
+
+    Kmat = np.array([[S, 0, 0, 0],
+                     [0, S, 0, 0],
+                     [0, p, 0, -1],
+                     [p, -p, -1, 0],
+                     [0, 0, 0, p],
+                     [0, 0, p, 0]])
+
+    sing_vals = np.linalg.svd(Kmat, compute_uv=False)
+
+    # Square of largest singular value.
+    return sing_vals[0]**2
+
+
 def main():
     filename = 'tmp_asl.nii.gz'
 
