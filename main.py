@@ -2,6 +2,14 @@ import nibabel as nib
 import numpy as np
 
 
+def normalise_data(d1, d2):
+    max1 = np.max(d1.ravel())
+    max2 = np.max(d2.ravel())
+
+    max_both = max(max1, max2)
+
+    return d1 * 1000 / max_both, d2 * 1000 / max_both
+
 def update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
                 ubar_c, ubar_l, vbar, wbar, lambd, alpha0, alpha1,\
                 gamma1, gamma2, reps, sigma, tau):
@@ -169,27 +177,19 @@ def Pfun(a, b):
     return to_ret
 
 
-def norm2_K_operator(S_norm2, op_norm2=12):
+def norm2_K_operator(L, dV=np.array([1,1,1])):
     # Find an upper bound on the squared norm of K.
-    # Inputs are squared norms, per original paper.
-    # S_norm2 bounds stacking operator's norm, I think <= timepoints.
-    # op_norm2 bounds 3D gradient operator norms, I think <= 12.
+    # L is the length of the image sequence, i.e. number of pairs.
+    # dV is voxel dimensions ratio, e.g. 2mm*3mm*4mm -> [0.5,0.75,1.0]
 
-    S = np.sqrt(S_norm2)
-    p = np.sqrt(op_norm2)
+    x = 2*np.linalg.norm(1/dV)
 
-    Kmat = np.array([[S, 0, 0, 0],
-                     [0, S, 0, 0],
-                     [0, p, 0, -1],
-                     [p, -p, -1, 0],
-                     [0, 0, 0, p],
-                     [0, 0, p, 0]])
+    Kmat = np.array([[0, x, 0, 1],
+                     [x, x, 1, 0],
+                     [0, 0, 0, x],
+                     [0, 0, x, 0]])
 
-    sing_vals = np.linalg.svd(Kmat, compute_uv=False)
-
-    # Square of largest singular value.
-    return sing_vals[0]**2
-
+    return np.linalg.norm(Kmat,2)**2 + L
 
 def main():
     filename = 'tmp_asl.nii.gz'
@@ -197,8 +197,11 @@ def main():
     datafile = nib.load(filename)
     data = datafile.get_data()
 
-    u_l_d = data[:,:,:,0::2]
-    u_c_d = data[:,:,:,1::2]
+    vox_sizes = np.array(datafile.header.get_zooms()[:-1])
+    vox_sizes = vox_sizes / np.max(vox_sizes)
+    print(vox_sizes)
+
+    u_l_d, u_c_d = normalise_data(data[:,:,:,0::2], data[:,:,:,1::2])
 
     u_l = np.nanmedian(u_l_d, 3)
     u_c = np.nanmedian(u_c_d, 3)
@@ -222,7 +225,7 @@ def main():
     wbar = w
 
     lambd = 4.0
-    alpha0 = 1.41
+    alpha0 = np.sqrt(3)
     alpha1 = 1.0
     gamma1 = 1.0
     gamma2 = 1.0
@@ -231,12 +234,14 @@ def main():
 
     # sigma*tau*|K|^2 < 1
     # sigma set by lambda according to paper.
-    sigma = 6.0 / lambd
-    K2 = norm2_K_operator(reps) * 1.1 # Grow |K|^2 by 10% to be safe.
-    tau = 1.0 / (sigma * K2)
+    K2 = norm2_K_operator(reps, vox_sizes) * 1.1 # Grow |K|^2 by 10% to be safe.
+    sigma = 1.0 / np.sqrt(K2)
+    tau = 1.0 / np.sqrt(K2)
 
     print('sigma: ' + str(sigma) + ', tau: ' + str(tau))
 
+    ubar_c_old = ubar_c
+    ubar_l_old = ubar_l
     num_iters = 100
     for i in range(num_iters):
         print('Iteration ' + str(i) + ' of ' + str(num_iters))
@@ -244,6 +249,15 @@ def main():
             update_step(u_c_d, u_l_d, P, Q, p, r, q, s, u_c, u_l, v, w,\
             ubar_c, ubar_l, vbar, wbar, lambd, alpha0, alpha1, gamma1,\
             gamma2, reps, sigma, tau)
+
+        diff_c = np.linalg.norm((ubar_c - ubar_c_old).ravel()) /\
+                 np.linalg.norm(ubar_c_old[ubar_c_old.nonzero()])
+        diff_l = np.linalg.norm((ubar_l - ubar_l_old).ravel()) /\
+                 np.linalg.norm(ubar_l_old[ubar_l_old.nonzero()])
+        print('control difference this iteration: ' + str(diff_c))
+        print('label difference this iteration: ' + str(diff_l))
+        ubar_c_old = ubar_c
+        ubar_l_old = ubar_l
 
     # Add singleton dimension so outputs can be concatenated.
     ubar_c = np.expand_dims(ubar_c, axis=3)
